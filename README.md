@@ -1,4 +1,4 @@
-## jquery-table
+## jQuery-table
 
 ## Deadline 07.11 EOD
 
