@@ -1,0 +1,1 @@
+[{"productName":"Apple","email":"Apple@gmail.com","count":150,"price":25,"id":0,"delivery":{"country":"Belorus","cities":[null,"Grodno","Vitebsk"]}},{"productName":"Pears","email":"Pear@gmail.com","count":213,"price":55,"id":1,"delivery":{"country":"Russia","cities":["Saratov","Moscow","St. Petersburg"]}}]
