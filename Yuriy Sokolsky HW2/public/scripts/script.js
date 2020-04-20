@@ -7,7 +7,16 @@ function ajaxReq(url, data, callback){
         dataType:'json'
     }).done(callback);
 }
+let ProductsList=[];
+$( document ).ready(function() {
 
+    ajaxReq("/getProducts", {}, function(data){
+        ProductsList=data;
+        renderTable(data);
+
+    })
+
+});
 $.fn.serializeFormJSON = function () {
 
     var o = {};
@@ -25,15 +34,81 @@ $.fn.serializeFormJSON = function () {
     return o;
 };
 
+function openDetail() {
+    let productId= $(this).closest('tr').attr('id');
+    let Product=ProductsList.find(x => parseInt(x.id) === parseInt(productId));
+    $('#modalBackround').show();
+    $('.modalDialogEdit').show();
+    $("#productName").val(Product.productName);
+    $("#supplierEmail").val(Product.email);
+    $("#productCount").val(Product.count);
+    $("#productPrice").val(Product.price);
+    $("#productPrice").change();
+    $("#productid").val(Product.id);
+    $("#selCountry option").filter(function() {
+        return this.text === Product.delivery.country;
+    }).attr('selected', true);
+    $("#selCountry").change();
+    Countries = [$("#city1") , $("#city2"), $("#city3")]
+    Countries[0].prop("checked", Product.delivery.cities[0] ? true :false);
+    Countries[1].prop("checked", Product.delivery.cities[1] ? true :false);
+    Countries[2].prop("checked", Product.delivery.cities[2] ? true :false);
+}
+function buttonDelete() {
+    let productId = $(this).closest('tr').attr('id');
+    $('#modalBackround').show();
+    $('.modalDialogAlert').show();
+    let tmplalert = document.getElementById('alert-template').innerHTML.trim();
+    document.getElementById('alert-holder').innerHTML = _.template(tmplalert)({
+        productId: productId,
+        productName:ProductsList.find(x => parseInt(x.id) === parseInt(productId)).productName
+    });
+
+}
+function renderTable(Products) {
+    var tmpl = document.getElementById('grid-template').innerHTML.trim();
+    tmpl = _.template(tmpl);
+    document.getElementById('grid-holder').innerHTML = tmpl({
+        list: Products
+    });
+    for (const openDetailA of document.querySelectorAll('a[name="openDetail"]')) {
+        openDetailA.addEventListener('click', openDetail)
+    }
+    for (const editDetailIn of document.querySelectorAll('input[name="openEdit"]')) {
+        editDetailIn.addEventListener('click', openDetail)
+    }
+    for (const deleteProductIn of document.querySelectorAll('input[name="buttonDelete"]')) {
+        deleteProductIn.addEventListener('click', buttonDelete)
+    }
+}
+function deleteProduct(id){
+
+    ajaxReq("/deleteProduct",{id:id} , function(result) {
+        if (result){
+            renderTable(result);
+            closemodals();
+            return true
+        }else{
+            return false ;
+        }
+    });
+
+}
+
 $('#openAddNew').on("click", function() {
     $('#modalBackround').show();
     $('.modalDialogEdit').show();
+    $('#selCountry option:selected').removeAttr('selected');
+    $("#checkboxGroup").addClass("d-none");
+    $('form[name="Product"]').trigger("reset");
 })
-$('.closeModalDialog,#Cancel').on("click", function() {
+$('.closeModalDialog,#Cancel,#CancelDelete').on("click", closemodals);
+
+    function closemodals() {
     $('#modalBackround').hide();
     $('.modalDialogAlert').hide();
     $('.modalDialogEdit').hide();
-})
+}
 $(".modalDialogEdit").click(function(e) {
     e.stopPropagation();
 });
@@ -88,11 +163,14 @@ $("#selCountry").change(function() {
 $('form[name="Product"]').submit(function(){
 
     let Product= $(this).serializeFormJSON();
-    console.log(Product);
-    ajaxReq("/sendProduct/",Product , function(result) {
-
+    ajaxReq("/sendProduct",Product , function(result) {
+    if (result){
+        return true
+    }else{
+        return false ;
+    }
     });
-    return false;
+    //return false;
 });
 
 $("#productName").change(function() {
@@ -124,3 +202,5 @@ $('#productPrice').on('input', function() {
 $("#productPrice").change(function() {
     $(this).val('$' + parseFloat($(this).val(), 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString());
 });
+
+

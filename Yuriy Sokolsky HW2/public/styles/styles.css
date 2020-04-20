@@ -33,7 +33,7 @@
     background-color: #fefefe;
     margin: auto;
     padding: 20px;
-    width: 80%;
+    width: 500px;
 }
 .modalHeader{
     border-bottom: 1px solid black;
@@ -43,6 +43,7 @@
     color: #212529;
     font-size: 1.3rem;
     line-height: 1.5;
+    margin-bottom: 10px;
 }
 /* The Close Button */
 .close {
