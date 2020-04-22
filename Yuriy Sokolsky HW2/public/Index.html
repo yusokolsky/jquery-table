@@ -8,25 +8,39 @@
 </head>
 
 <body>
+<div class="fixed-top" id="timerForExample">
+</div>
 <div class="mx-auto mt-5 w-50">
     <div class="menu">
         <div class="row d-flex justify-content-center mr-0 ml-0">
             <input type="text" class="form-control col-md-4 " id="serachProduct" placeholder="Enter product name...">
-            <div class="col-md-4"><input type="button" class="btn btn-outline-secondary  " value="Search" /></div>
+            <div class="col-md-4"><input type="button" id="searchButton" class="btn btn-outline-secondary  " value="Search" /></div>
             <div class="col-md-4"><input id="openAddNew" type="button" class="btn btn-outline-secondary float-right mr-0" value="Add New" /></div>
 
         </div>
     </div>
-    <div id="grid-holder"></div>
-    <script type="text/template" id="grid-template">
-        <table  class="table table-bordered mt-5">
-            <thead>
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Price</th>
-                <th scope="col">Actions</th>
-            </tr>
-            </thead>
+
+    <table  class="table table-bordered mt-5">
+        <thead>
+        <tr>
+            <th scope="col" id="headerName" style="cursor:pointer">
+                <div class="float-left ml-0" >
+                    Name
+                </div>
+                <div id="sortDirectionName" class="float-right mr-0 " data-sortStatus="none">
+                </div>
+            </th>
+            <th scope="col" id="headerPrice" style="cursor:pointer">
+                <div class="float-left ml-0" >
+                    Price
+                </div>
+                <div id="sortDirectionPrice" class="float-right mr-0 " data-sortStatus="none">
+                </div></th>
+            <th scope="col">Actions</th>
+        </tr>
+        </thead>
+        <tbody id="grid-holder"></tbody>
+        <script type="text/template" id="grid-template">
             <tbody>
             <% for(var i = 0; i < list.length; i++) { %>
             <tr id="<%=encodeURIComponent(list[i].id)%>" name="<%=encodeURIComponent(list[i].productName)%>">
@@ -42,15 +56,16 @@
                 <td>
                     <%= ('$' + parseFloat(list[i].price, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString())%>
                 </td>
-                <td>
+                <td class="text-center">
                     <input name="openEdit"  type="button" class="btn btn-outline-primary" value="Edit" />
                     <input name="buttonDelete"  type="button"  class="btn btn-outline-secondary ml-3" value="Delete" />
                 </td>
             </tr>
             <% } %>
             </tbody>
-        </table>
-    </script>
+        </script>
+    </table>
+
 
 </div>
 
@@ -63,9 +78,9 @@
             <div id="alert-holder" class="text-center"></div>
             <script type="text/template" id="alert-template">
                 <div>Are you sure you want to delete <b><%=productName%></b> ?</div>
-            <input id="yesDelete" type="button" onclick="deleteProduct('<%=productId%>')" class="btn btn-outline-primary m-3" value="Yes" />
-            <input id="CancelDelete" type="button" class="btn btn-outline-secondary m-3" onclick="closemodals()" value="No" />
-         </script>
+                <input id="yesDelete" type="button" onclick="deleteProduct('<%=productId%>')" class="btn btn-outline-primary m-3" value="Yes" />
+                <input id="CancelDelete" type="button" class="btn btn-outline-secondary m-3" onclick="closemodals()" value="No" />
+            </script>
         </div>
 
     </div>
@@ -76,23 +91,25 @@
             </div>
 
             <form name="Product">
-                <input type="text" class=" d-none" id="productid" name="id" >
+                <input  class=" d-none" id="productid" name="id" >
                 <div class="form-group w-50 pt-3">
                     <label for="productName">Name: *</label>
-                    <input type="text" class="form-control" id="productName" name="productName" required maxlength="15" minlength="5">
+                    <input type="text" class="form-control" id="productName" name="productName"  maxlength="15" minlength="5">
                     <small id="nameMaxLenAlert" class="form-text d-none text-danger">Name must be between 5 and 15 characters</small>
                 </div>
                 <div class="form-group w-50">
                     <label for="supplierEmail">Supplier email: *</label>
-                    <input type="email" class="form-control" id="supplierEmail" name="email" required>
+                    <input type="text" class="form-control" id="supplierEmail" name="email" >
+                    <small id="productEmailAlert" class="form-text d-none text-danger">Please enter a valid email</small>
                 </div>
                 <div class="form-group w-25">
                     <label for="productCount">Count: *</label>
-                    <input type="text" class="form-control" id="productCount" name="count" required>
+                    <input type="text" class="form-control" id="productCount" name="count" >
+                    <small id="productCountAlert" class="form-text d-none text-danger">Enter valid count number</small>
                 </div>
                 <div class="form-group w-50">
                     <label for="productPrice">Price: *</label>
-                    <input type="text" class="form-control" id="productPrice" name="price" required>
+                    <input type="text" class="form-control" id="productPrice" name="price" >
                     <small id="productPriceAlert" class="form-text d-none text-danger">Enter valid decimal number</small>
                 </div>
 
