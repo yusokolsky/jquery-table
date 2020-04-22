@@ -1,1 +1,0 @@
-web: node Yuriy-Sokolsky-HW2/server.js
