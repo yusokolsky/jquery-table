@@ -275,6 +275,8 @@ $('form[name="Product"]').submit(function() {
                     if (result) {
                         renderTable(result);
                         ProductsList = result;
+                        Searchresults=result;
+                        searchByName();
                         $(':input', 'form[name="Product"]')
                             .not(':button, :submit, :reset, :hidden')
                             .val('')
