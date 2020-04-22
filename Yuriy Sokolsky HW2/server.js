@@ -4,7 +4,7 @@ var bodyParser = require('body-parser');
 var jsonfile = require('jsonfile');
 app.use(bodyParser.json());
 app.use(express.static('public'));
-app.set('port', process.env.PORT || 8080);
+app.set('port', process.env.PORT || 80);
 let file = 'Products.json';
 let Products = [];
 let server = app.listen(app.get('port'), function() { //identification
