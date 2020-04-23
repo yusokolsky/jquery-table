@@ -13,7 +13,7 @@
 <div class="mx-auto mt-5 w-50">
     <div class="menu">
         <div class="row d-flex justify-content-center mr-0 ml-0">
-            <input type="text" class="form-control col-md-4 " id="serachProduct" placeholder="Enter product name...">
+            <input type="text" class="form-control col-md-4 " id="serachitem" placeholder="Enter item name...">
             <div class="col-md-4"><input type="button" id="searchButton" class="btn btn-outline-secondary  " value="Search" /></div>
             <div class="col-md-4"><input id="openAddNew" type="button" class="btn btn-outline-secondary float-right mr-0" value="Add New" /></div>
 
@@ -43,10 +43,10 @@
         <script type="text/template" id="grid-template">
             <tbody>
             <% for(var i = 0; i < list.length; i++) { %>
-            <tr id="<%=encodeURIComponent(list[i].id)%>" name="<%=encodeURIComponent(list[i].productName)%>">
+            <tr id="<%=encodeURIComponent(list[i].id)%>" name="<%=encodeURIComponent(list[i].itemName)%>">
                 <td>
                     <div class="float-left ml-0" >
-                        <a name='openDetail' href="#"> <%=list[i].productName%></a>
+                        <a name='openDetail' href="#"> <%=list[i].itemName%></a>
                     </div>
                     <div class="float-right mr-0 badge badge-dark">
                         <%=list[i].count%>
@@ -77,8 +77,8 @@
             </div>
             <div id="alert-holder" class="text-center"></div>
             <script type="text/template" id="alert-template">
-                <div>Are you sure you want to delete <b><%=productName%></b> ?</div>
-                <input id="yesDelete" type="button" onclick="deleteProduct('<%=productId%>')" class="btn btn-outline-primary m-3" value="Yes" />
+                <div>Are you sure you want to delete <b><%=itemName%></b> ?</div>
+                <input id="yesDelete" type="button" onclick="deleteitem('<%=itemId%>')" class="btn btn-outline-primary m-3" value="Yes" />
                 <input id="CancelDelete" type="button" class="btn btn-outline-secondary m-3" onclick="closemodals()" value="No" />
             </script>
         </div>
@@ -86,31 +86,31 @@
     </div>
     <div class="modalDialogEdit">
         <div class="modalContent border rounded border-dark">
-            <div class="modalHeader">Product Name
+            <div class="modalHeader">item Name
                 <span class="close closeModalDialog">&times;</span>
             </div>
 
-            <form name="Product">
-                <input  class=" d-none" id="productid" name="id" >
+            <form name="item">
+                <input  class=" d-none" id="itemid" name="id" >
                 <div class="form-group w-50 pt-3">
-                    <label for="productName">Name: *</label>
-                    <input type="text" class="form-control" id="productName" name="productName"  maxlength="15" minlength="5">
+                    <label for="itemName">Name: *</label>
+                    <input type="text" class="form-control" id="itemName" name="itemName"  maxlength="15" minlength="5">
                     <small id="nameMaxLenAlert" class="form-text d-none text-danger">Name must be between 5 and 15 characters</small>
                 </div>
                 <div class="form-group w-50">
                     <label for="supplierEmail">Supplier email: *</label>
                     <input type="text" class="form-control" id="supplierEmail" name="email" >
-                    <small id="productEmailAlert" class="form-text d-none text-danger">Please enter a valid email</small>
+                    <small id="itemEmailAlert" class="form-text d-none text-danger">Please enter a valid email</small>
                 </div>
                 <div class="form-group w-25">
-                    <label for="productCount">Count: *</label>
-                    <input type="text" class="form-control" id="productCount" name="count" >
-                    <small id="productCountAlert" class="form-text d-none text-danger">Enter valid count number</small>
+                    <label for="itemCount">Count: *</label>
+                    <input type="text" class="form-control" id="itemCount" name="count" >
+                    <small id="itemCountAlert" class="form-text d-none text-danger">Enter valid count number</small>
                 </div>
                 <div class="form-group w-50">
-                    <label for="productPrice">Price: *</label>
-                    <input type="text" class="form-control" id="productPrice" name="price" >
-                    <small id="productPriceAlert" class="form-text d-none text-danger">Enter valid decimal number</small>
+                    <label for="itemPrice">Price: *</label>
+                    <input type="text" class="form-control" id="itemPrice" name="price" >
+                    <small id="itemPriceAlert" class="form-text d-none text-danger">Enter valid decimal number</small>
                 </div>
 
                 <span>Delivery: </span>

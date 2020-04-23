@@ -5,53 +5,53 @@ var jsonfile = require('jsonfile');
 app.use(bodyParser.json());
 app.use(express.static('public'));
 app.set('port', process.env.PORT || 80);
-let file = 'Products.json';
-let Products = [];
+let file = 'items.json';
+let items = [];
 let server = app.listen(app.get('port'), function() { //identification
     console.log('Сервер запущен на  http://localhost:' + app.get('port') + '  Ctrl-C to terminate');
-    jsonfile.readFile(file, function(err, obj) {
-        Products = obj
+    jsonfile.readFile(file, function(err, obj) {                                                        //on server start read file
+        items = obj
     })
 });
-app.post('/getProducts', function(req, res) {
-    res.json(Products);
+app.post('/getitems', function(req, res) {                              //send files
+    res.json(items);
 })
-app.post('/deleteProduct', function(req, res) {
+app.post('/deleteitem', function(req, res) {                               //delete item
     let idToDelete = req.body.id;
-    Products.splice(Products.findIndex(s => s.id == idToDelete), 1);
-    jsonfile.writeFile(file, Products, function(err) {
+    items.splice(items.findIndex(s => s.id == idToDelete), 1);
+    jsonfile.writeFile(file, items, function(err) {
         if (err) res.send(err)
-        else res.json(Products);
+        else res.json(items);
     });
 })
-app.post('/sendProduct', function(req, res) {
-    let Product = req.body;
-    Product.count = parseInt(Product.count);
-    Product.price = parseFloat(Product.price.replace(/[^0-9.]/g, ""));
-    Product.delivery = {
-        country: Product.country,
-        cities: [Product.city1, Product.city2, Product.city3]
+app.post('/senditem', function(req, res) {
+    let item = req.body;
+    item.count = parseInt(item.count);
+    item.price = parseFloat(item.price.replace(/[^0-9.]/g, ""));
+    item.delivery = {
+        country: item.country,
+        cities: [item.city1, item.city2, item.city3]
     }
-    delete Product.country;
-    delete Product.city1;
-    delete Product.city2;
-    delete Product.city3;
-    if (Product.id) { //id retruns only if we edit existing product
-        Products = Products.map(old => {
-            if (parseInt(old.id) === parseInt(Product.id)) {
-                return Product;
+    delete item.country;
+    delete item.city1;
+    delete item.city2;
+    delete item.city3;
+    if (item.id) {                                          //id retruns only if we edit existing item
+        items = items.map(old => {
+            if (parseInt(old.id) === parseInt(item.id)) {
+                return item;
             }
             return old;
         });
     } else {
-        if (Products.length > 0)
-            Product.id = parseInt(Products[Products.length - 1].id) + 1;
-        else Product.id = 1;
-        Products.push(Product);
+        if (items.length > 0)
+            item.id = parseInt(items[items.length - 1].id) + 1;
+        else item.id = 1;
+        items.push(item);
     }
-    jsonfile.writeFile(file, Products, function(err) {
+    jsonfile.writeFile(file, items, function(err) {
         if (err) res.send(err)
-        else res.send(Products);
+        else res.send(items);
     });
     //res.send(true);
 });

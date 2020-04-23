@@ -1,5 +1,5 @@
-//SetTimeout setInterval example for education
-function secStarts() {
+
+function secStarts() {                                      //SetTimeout setInterval example for education
     let i = 0;
     let timerId = setInterval(() => $("#timerForExample").html(`time passed:${i++}`), 1000)
 }
@@ -14,16 +14,16 @@ function ajaxReq(url, data, callback) {
         dataType: 'json'
     }).done(callback);
 }
-let ProductsList = [];
-let Searchresults = [];
-$(document).ready(function() {
-    ajaxReq("/getProducts", {}, function(data) {
-        ProductsList = data;
+let itemsList = [];                                          //for storage
+let Searchresults = [];                                         //for displaying
+$(document).ready(function() {                                  //load item list on page ready
+    ajaxReq("/getitems", {}, function(data) {
+        itemsList = data;
         Searchresults = data;
         renderTable(Searchresults);
     })
 });
-$.fn.serializeFormJSON = function() {
+$.fn.serializeFormJSON = function() {                           //serialize Form to JSON
     var o = {};
     var a = this.serializeArray();
     $.each(a, function() {
@@ -39,73 +39,73 @@ $.fn.serializeFormJSON = function() {
     return o;
 };
 
-function openDetail() {
-    $('form[name="Product"] :input').each(function() {
-        $(this).removeClass("text-danger border-danger");
+function openDetail() {                                           //on Open item
+    $('form[name="item"] :input').each(function() {
+        $(this).removeClass("text-danger border-danger");         //remove warnings from fields
     })
-    $('form[name="Product"] small').each(function() {
+    $('form[name="item"] small').each(function() {                 //remove warnings label from fields
         $(this).addClass("d-none");
     })
-    let productId = $(this).closest('tr').attr('id');
-    let Product = Searchresults.find(x => parseInt(x.id) === parseInt(productId));
-    $('#modalBackround').show();
+    let itemId = $(this).closest('tr').attr('id');                  //get opened items id
+    let item = Searchresults.find(x => parseInt(x.id) === parseInt(itemId));//finding item
+    $('#modalBackround').show();                         //display modal windows
     $('.modalDialogEdit').show();
-    $("#productName").val(Product.productName);
-    $("#supplierEmail").val(Product.email);
-    $("#productCount").val(Product.count);
-    $("#productPrice").val(Product.price);
-    $("#productPrice").change();
-    $("#productid").val(Product.id);
+    $("#itemName").val(item.itemName);                   //filling fields with parameters of selected item
+    $("#supplierEmail").val(item.email);
+    $("#itemCount").val(item.count);
+    $("#itemPrice").val(item.price);
+    $("#itemPrice").change();
+    $("#itemid").val(item.id);
     $("#selCountry option:selected").removeAttr("selected")
-    $("#selCountry").val(Product.delivery.country);
+    $("#selCountry").val(item.delivery.country);
     $("#selCountry option").filter(function() {
-        return this.text === Product.delivery.country;
+        return this.text === item.delivery.country;
     }).attr('selected', true);
     $("#selCountry").change();
     Countries = [$("#city1"), $("#city2"), $("#city3")]
-    Countries[0].prop("checked", Product.delivery.cities[0] ? true : false);
-    Countries[1].prop("checked", Product.delivery.cities[1] ? true : false);
-    Countries[2].prop("checked", Product.delivery.cities[2] ? true : false);
+    Countries[0].prop("checked", item.delivery.cities[0] ? true : false);
+    Countries[1].prop("checked", item.delivery.cities[1] ? true : false);
+    Countries[2].prop("checked", item.delivery.cities[2] ? true : false);
 }
 
 function buttonDelete() {
-    let productId = $(this).closest('tr').attr('id');
-    $('#modalBackround').show();
+    let itemId = $(this).closest('tr').attr('id');                   //get opened items id
+    $('#modalBackround').show();                                    //display modal windows
     $('.modalDialogAlert').show();
-    let tmplalert = document.getElementById('alert-template').innerHTML.trim();
+    let tmplalert = document.getElementById('alert-template').innerHTML.trim();     //rendering delete modal window
     document.getElementById('alert-holder').innerHTML = _.template(tmplalert)({
-        productId: productId,
-        productName: Searchresults.find(x => parseInt(x.id) === parseInt(productId)).productName
+        itemId: itemId,
+        itemName: Searchresults.find(x => parseInt(x.id) === parseInt(itemId)).itemName
     });
 }
 
-function renderTable(Products) {
+function renderTable(items) {                                           //table render function
     var tmpl = document.getElementById('grid-template').innerHTML.trim();
     tmpl = _.template(tmpl);
     document.getElementById('grid-holder').innerHTML = tmpl({
-        list: Products
+        list: items
     });
-    for (const openDetailA of document.querySelectorAll('a[name="openDetail"]')) {
+    for (const openDetailA of document.querySelectorAll('a[name="openDetail"]')) {      //set events for buttons which rendered
         openDetailA.addEventListener('click', openDetail)
     }
     for (const editDetailIn of document.querySelectorAll('input[name="openEdit"]')) {
         editDetailIn.addEventListener('click', openDetail)
     }
-    for (const deleteProductIn of document.querySelectorAll('input[name="buttonDelete"]')) {
-        deleteProductIn.addEventListener('click', buttonDelete)
+    for (const deleteitemIn of document.querySelectorAll('input[name="buttonDelete"]')) {
+        deleteitemIn.addEventListener('click', buttonDelete)
     }
 }
 
-function deleteProduct(id) {
-    ajaxReq("/deleteProduct", {
+function deleteitem(id) {                               //deleting item
+    ajaxReq("/deleteitem", {
         id: id
     }, function(result) {
         if (result) {
-            renderTable(result);
-            ProductsList = result;
+            renderTable(result);                        //render table after deleting item
+            itemsList = result;
             Searchresults = result;
             closemodals();
-            searchByName();
+            searchByName();                             //search again after render to display if item was delete after search
             return true
         } else {
             return false;
@@ -113,15 +113,15 @@ function deleteProduct(id) {
     });
 }
 
-function checkValidEmail(mail) {
+function checkValidEmail(mail) {                        //check email for valid
     return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail);
 }
-$('#openAddNew').on("click", function() {
+$('#openAddNew').on("click", function() {               //on open item modal
     $('#modalBackround').show();
     $('.modalDialogEdit').show();
     $('#selCountry option:selected').removeAttr('selected');
     $("#checkboxGroup").addClass("d-none");
-    $('form[name="Product"]').trigger("reset");
+    $('form[name="item"]').trigger("reset");
 })
 $('.closeModalDialog,#Cancel,#CancelDelete').on("click", closemodals);
 
@@ -132,17 +132,13 @@ function closemodals() {
 }
 
 function searchByName() {
-    let targetName = $('#serachProduct').val();
-    Searchresults = ProductsList.filter(x => (x.productName.toLowerCase().includes(targetName.toLowerCase())));
+    let targetName = $('#serachitem').val();
+    Searchresults = itemsList.filter(x => (x.itemName.toLowerCase().includes(targetName.toLowerCase())));   //searching
     renderTable(Searchresults);
 }
 
-function compareValues(key, order = 'asc') {
+function compareValues(key, order = 'asc') {                //sorting object by key(field
     return function innerSort(a, b) {
-        if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
-            // property doesn't exist on either object
-            return 0;
-        }
         const varA = (typeof a[key] === 'string') ?
             a[key].toUpperCase() : a[key];
         const varB = (typeof b[key] === 'string') ?
@@ -159,39 +155,39 @@ function compareValues(key, order = 'asc') {
     };
 }
 
-function sortByPrice() {
-    let arrowP = $("#sortDirectionPrice");
-    let arrowN = $("#sortDirectionName")
+function sortByPrice() {                                            //sorting by price
+    let arrowP = $("#sortDirectionPrice");                              //arrow for price
+    let arrowN = $("#sortDirectionName")                                //arrow for name
     arrowN.attr("data-sortStatus", "none");
-    arrowN.removeClass("badge badge-dark");
+    arrowN.removeClass("badge badge-dark");                             //hide arrow for name
     arrowN.html('');
-    arrowChange(arrowP);
-    if (arrowP.attr("data-sortStatus") === "largeToSmall")
+    arrowChange(arrowP);                                                //change arrow for price
+    if (arrowP.attr("data-sortStatus") === "largeToSmall")              //sort type is stored in arrow attribute
         Searchresults.sort(compareValues('price', 'desc'));
     else
     if (arrowP.attr("data-sortStatus") === "SmallToLarge")
         Searchresults.sort(compareValues('price', 'asc'));
-    renderTable(Searchresults)
+    renderTable(Searchresults)                                          //rerender after sorting
 }
 $("#headerName").click(sortByName);
 $("#headerPrice").click(sortByPrice);
 
-function sortByName() {
-    let arrowP = $("#sortDirectionPrice");
-    let arrowN = $("#sortDirectionName");
+function sortByName() {                                             //sorting by name
+    let arrowP = $("#sortDirectionPrice");                          //arrow for price
+    let arrowN = $("#sortDirectionName");                           //arrow for name
     arrowP.attr("data-sortStatus", "none");
-    arrowP.removeClass("badge badge-dark");
+    arrowP.removeClass("badge badge-dark");                         //hide arrow for price
     arrowP.html('');
-    arrowChange(arrowN);
-    if (arrowN.attr("data-sortStatus") === "largeToSmall")
-        Searchresults.sort(compareValues('productName', 'asc'));
+    arrowChange(arrowN);                                            //change arrow for price
+    if (arrowN.attr("data-sortStatus") === "largeToSmall")          //sort type is stored in arrow attribute
+        Searchresults.sort(compareValues('itemName', 'asc'));
     else
     if (arrowN.attr("data-sortStatus") === "SmallToLarge")
-        Searchresults.sort(compareValues('productName', 'desc'));
+        Searchresults.sort(compareValues('itemName', 'desc'));
     renderTable(Searchresults)
 }
 
-function arrowChange(arrow) {
+function arrowChange(arrow) {                                          //changing arrow direction
     if (arrow.attr("data-sortStatus") === "none") {
         arrow.attr("data-sortStatus", "largeToSmall");
         arrow.html('&#9660;');
@@ -212,15 +208,15 @@ function arrowChange(arrow) {
 $(".modalDialogEdit .modalDialogAlert").click(function(e) {
     e.stopPropagation();
 });
-// $('#modalBackround').on("click",function () {
+// $('#modalBackround').on("click",function () {                //closing a modal window by clicking outside
 //     $('#modalBackround').hide();
 //     $('.modalDialogAlert').hide();
 //     $('.modalDialogEdit').hide();
 // })
-$("#checkAll").click(function() {
+$("#checkAll").click(function() {                                //check all in form
     $(".check").prop('checked', $(this).prop('checked'));
 });
-$("#selCountry").change(function() {
+$("#selCountry").change(function() {                            //display cities depending on the selected country
     $("#checkboxGroup").removeClass("d-none");
     Countries = [$("#city1"), $("#city2"), $("#city3")]
     switch ($("#selCountry option:selected").text()) {
@@ -252,10 +248,10 @@ $("#selCountry").change(function() {
             $("#checkboxGroup").addClass("d-none");
     }
 });
-$('form[name="Product"]').submit(function() {
+$('form[name="item"]').submit(function() {                                  //form sending
     let promise = new Promise((resolve, reject) => {
         let i = 0;
-        $($('form[name="Product"] :input:text').get().reverse()).each(function() {
+        $($('form[name="item"] :input:text').get().reverse()).each(function() { //if field empty focus on it and add alert
             if ($(this).val() == "") {
                 $(this).focus();
                 $(this).addClass("text-danger border-danger");
@@ -264,20 +260,20 @@ $('form[name="Product"]').submit(function() {
             }
         });
         if (i >= 4) {
-            resolve("result");
+            resolve("result");                              //if all fields are good
         } else reject("error");
     });
     promise
         .then(
             result => {
-                let Product = $(this).serializeFormJSON();
-                ajaxReq("/sendProduct", Product, function(result) {
+                let item = $(this).serializeFormJSON();
+                ajaxReq("/senditem", item, function(result) {   //sending the form
                     if (result) {
-                        renderTable(result);
-                        ProductsList = result;
+                        renderTable(result);                            //render table
+                        itemsList = result;
                         Searchresults=result;
                         searchByName();
-                        $(':input', 'form[name="Product"]')
+                        $(':input', 'form[name="item"]')                 //clearing form
                             .not(':button, :submit, :reset, :hidden')
                             .val('')
                             .prop('checked', false)
@@ -294,53 +290,53 @@ $('form[name="Product"]').submit(function() {
         );
     return false;
 });
-$("#supplierEmail").change(function() {
+$("#supplierEmail").change(function() {                             //email checker
     if (checkValidEmail($(this).val())) {
-        $("#productEmailAlert").addClass("d-none");
+        $("#itemEmailAlert").addClass("d-none");
         $("#supplierEmail").removeClass("text-danger border-danger");
     } else {
-        $("#productEmailAlert").removeClass("d-none");
+        $("#itemEmailAlert").removeClass("d-none");
         $("#supplierEmail").addClass("text-danger border-danger");
     }
 });
-$("#productName").change(function() {
+$("#itemName").change(function() {                                     //name checker
     if ((/^\s+$/.test(($(this).val()))) || $(this).val().length < 5 || $(this).val() > 15) {
         $("#nameMaxLenAlert").removeClass("d-none");
-        $("#productName").addClass("text-danger border-danger");
+        $("#itemName").addClass("text-danger border-danger");
     } else {
         $("#nameMaxLenAlert").addClass("d-none");
-        $("#productName").removeClass("text-danger border-danger");
+        $("#itemName").removeClass("text-danger border-danger");
     }
 });
-$('#productCount').on('input', function() {
+$('#itemCount').on('input', function() {                            //count checker
     this.value = this.value.replace(/[^0-9]/g, '');
-    $("#productPriceAlert").addClass("productCountAlert");
-    $("#productCount").removeClass("text-danger border-danger");
+    $("#itemPriceAlert").addClass("itemCountAlert");
+    $("#itemCount").removeClass("text-danger border-danger");
 });
-$('#productPrice').on('input', function() {
+$('#itemPrice').on('input', function() {                        //price checker
     this.value = this.value.replace(/[^\d\.]/g, '');
     if ($(this).val().match(/^-?\d+(?:\.\d+)?$/)) {
-        $("#productPriceAlert").addClass("d-none");
-        $("#productPrice").removeClass("text-danger border-danger");
+        $("#itemPriceAlert").addClass("d-none");
+        $("#itemPrice").removeClass("text-danger border-danger");
     } else {
-        $("#productPriceAlert").removeClass("d-none");
-        $("#productPrice").addClass("text-danger border-danger");
+        $("#itemPriceAlert").removeClass("d-none");
+        $("#itemPrice").addClass("text-danger border-danger");
     }
 });
-$('#searchButton').on("click", function() {
+$('#searchButton').on("click", function() {                 //search button
     searchByName();
 })
-$('#serachProduct').keypress(function(event) {
+$('#serachitem').keypress(function(event) {                 //on Enter press
     if (event.keyCode == 13) {
         searchByName();
     }
 });
-$('#serachProduct').keyup(function() {
+$('#serachitem').keyup(function() {                         //if search field are empty render the default view
     if ($(this).val() == "") {
-        renderTable(ProductsList);
-        Searchresults = ProductsList;
+        renderTable(itemsList);
+        Searchresults = itemsList;
     }
 });
-$("#productPrice").change(function() {
+$("#itemPrice").change(function() {                     //display price field like a dollar currency
     $(this).val('$' + parseFloat($(this).val(), 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString());
 });
