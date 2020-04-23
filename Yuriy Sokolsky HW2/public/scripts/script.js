@@ -7,7 +7,7 @@ setTimeout(secStarts, 5000);
 
 function ajaxReq(url, data, callback) {
     $.ajax({
-        url: url,
+        url,
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -16,16 +16,16 @@ function ajaxReq(url, data, callback) {
 }
 let itemsList = [];                                          //for storage
 let Searchresults = [];                                         //for displaying
-$(document).ready(function() {                                  //load item list on page ready
-    ajaxReq("/getitems", {}, function(data) {
+$(document).ready(() => {                                  //load item list on page ready
+    ajaxReq("/getitems", {}, data => {
         itemsList = data;
         Searchresults = data;
         renderTable(Searchresults);
     })
 });
 $.fn.serializeFormJSON = function() {                           //serialize Form to JSON
-    var o = {};
-    var a = this.serializeArray();
+    const o = {};
+    const a = this.serializeArray();
     $.each(a, function() {
         if (o[this.name]) {
             if (!o[this.name].push) {
@@ -47,7 +47,7 @@ function openDetail() {                                           //on Open item
         $(this).addClass("d-none");
     })
     let itemId = $(this).closest('tr').attr('id');                  //get opened items id
-    let item = Searchresults.find(x => parseInt(x.id) === parseInt(itemId));//finding item
+    let item = Searchresults.find(({id}) => parseInt(id) === parseInt(itemId));//finding item
     $('#modalBackround').show();                         //display modal windows
     $('.modalDialogEdit').show();
     $("#itemName").val(item.itemName);                   //filling fields with parameters of selected item
@@ -74,13 +74,13 @@ function buttonDelete() {
     $('.modalDialogAlert').show();
     let tmplalert = document.getElementById('alert-template').innerHTML.trim();     //rendering delete modal window
     document.getElementById('alert-holder').innerHTML = _.template(tmplalert)({
-        itemId: itemId,
-        itemName: Searchresults.find(x => parseInt(x.id) === parseInt(itemId)).itemName
+        itemId,
+        itemName: Searchresults.find(({id}) => parseInt(id) === parseInt(itemId)).itemName
     });
 }
 
 function renderTable(items) {                                           //table render function
-    var tmpl = document.getElementById('grid-template').innerHTML.trim();
+    let tmpl = document.getElementById('grid-template').innerHTML.trim();
     tmpl = _.template(tmpl);
     document.getElementById('grid-holder').innerHTML = tmpl({
         list: items
@@ -98,8 +98,8 @@ function renderTable(items) {                                           //table 
 
 function deleteitem(id) {                               //deleting item
     ajaxReq("/deleteitem", {
-        id: id
-    }, function(result) {
+        id
+    }, result => {
         if (result) {
             renderTable(result);                        //render table after deleting item
             itemsList = result;
@@ -116,7 +116,7 @@ function deleteitem(id) {                               //deleting item
 function checkValidEmail(mail) {                        //check email for valid
     return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail);
 }
-$('#openAddNew').on("click", function() {               //on open item modal
+$('#openAddNew').on("click", () => {               //on open item modal
     $('#modalBackround').show();
     $('.modalDialogEdit').show();
     $('#selCountry option:selected').removeAttr('selected');
@@ -133,7 +133,7 @@ function closemodals() {
 
 function searchByName() {
     let targetName = $('#serachitem').val();
-    Searchresults = itemsList.filter(x => (x.itemName.toLowerCase().includes(targetName.toLowerCase())));   //searching
+    Searchresults = itemsList.filter(({itemName}) => itemName.toLowerCase().includes(targetName.toLowerCase()));   //searching
     renderTable(Searchresults);
 }
 
@@ -205,7 +205,7 @@ function arrowChange(arrow) {                                          //changin
         }
     }
 }
-$(".modalDialogEdit .modalDialogAlert").click(function(e) {
+$(".modalDialogEdit .modalDialogAlert").click(e => {
     e.stopPropagation();
 });
 // $('#modalBackround').on("click",function () {                //closing a modal window by clicking outside
@@ -216,7 +216,7 @@ $(".modalDialogEdit .modalDialogAlert").click(function(e) {
 $("#checkAll").click(function() {                                //check all in form
     $(".check").prop('checked', $(this).prop('checked'));
 });
-$("#selCountry").change(function() {                            //display cities depending on the selected country
+$("#selCountry").change(() => {                            //display cities depending on the selected country
     $("#checkboxGroup").removeClass("d-none");
     Countries = [$("#city1"), $("#city2"), $("#city3")]
     switch ($("#selCountry option:selected").text()) {
@@ -267,7 +267,7 @@ $('form[name="item"]').submit(function() {                                  //fo
         .then(
             result => {
                 let item = $(this).serializeFormJSON();
-                ajaxReq("/senditem", item, function(result) {   //sending the form
+                ajaxReq("/senditem", item, result => {   //sending the form
                     if (result) {
                         renderTable(result);                            //render table
                         itemsList = result;
@@ -323,11 +323,11 @@ $('#itemPrice').on('input', function() {                        //price checker
         $("#itemPrice").addClass("text-danger border-danger");
     }
 });
-$('#searchButton').on("click", function() {                 //search button
+$('#searchButton').on("click", () => {                 //search button
     searchByName();
 })
-$('#serachitem').keypress(function(event) {                 //on Enter press
-    if (event.keyCode == 13) {
+$('#serachitem').keypress(({keyCode}) => {                 //on Enter press
+    if (keyCode == 13) {
         searchByName();
     }
 });
@@ -338,5 +338,5 @@ $('#serachitem').keyup(function() {                         //if search field ar
     }
 });
 $("#itemPrice").change(function() {                     //display price field like a dollar currency
-    $(this).val('$' + parseFloat($(this).val(), 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString());
+    $(this).val(`$${parseFloat($(this).val(), 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString()}`);
 });
