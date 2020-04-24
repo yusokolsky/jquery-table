@@ -1,7 +1,7 @@
-import express from 'express';
+let express = require('express');
 let app = express();
-import bodyParser from 'body-parser';
-import jsonfile from 'jsonfile';
+let bodyParser = require('body-parser');
+let jsonfile = require('jsonfile');
 app.use(bodyParser.json());
 app.use(express.static('public'));
 app.set('port', process.env.PORT || 80);
