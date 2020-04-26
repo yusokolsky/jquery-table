@@ -1,12 +1,12 @@
 //state
-let sortStatus="none";
-let arrowP = $("#sortDirectionPrice");                              //arrow for price
-let arrowN = $("#sortDirectionName")                //arrow for name
-let itemsList = [];                                          //for storage
-let searchResults = [];                                         //for displaying
-let itemPriceinput=$("#itemPrice");
+let sortStatus = "none";
+let arrowP = $("#sortDirectionPrice"); //arrow for price
+let arrowN = $("#sortDirectionName") //arrow for name
+let itemsList = []; //for storage
+let searchResults = []; //for displaying
+let itemPriceinput = $("#itemPrice");
 
-function secStarts() {                                      //SetTimeout setInterval example for education
+function secStarts() { //SetTimeout setInterval example for education
     let i = 0;
     let timerId = setInterval(() => $("#timerForExample").html(`time passed:${i++}`), 1000)
 }
@@ -22,7 +22,7 @@ function ajaxReq(url, data, callback) {
     }).done(callback);
 }
 
-$(document).ready(() => {                                  //load item list on page ready
+$(document).ready(() => { //load item list on page ready
     ajaxReq("/getitems", {}, data => {
         itemsList = data;
         searchResults = data;
@@ -32,7 +32,7 @@ $(document).ready(() => {                                  //load item list on p
 
 //render
 
-function renderTable(items) {                                           //table render function
+function renderTable(items) { //table render function
     let tmpl = $("#grid-template").html().trim();
     tmpl = _.template(tmpl);
     $("#grid-holder").html(tmpl({
@@ -44,16 +44,16 @@ function renderTable(items) {                                           //table 
 
 //delete
 
-function deleteitem(id) {                               //deleting item
+function deleteitem(id) { //deleting item
     ajaxReq("/deleteitem", {
         id
     }, result => {
         if (result) {
-            renderTable(result);                        //render table after deleting item
+            renderTable(result); //render table after deleting item
             itemsList = result;
             searchResults = result;
             closemodals();
-            searchByName();                             //search again after render to display if item was delete after search
+            searchByName(); //search again after render to display if item was delete after search
             return true
         } else {
             return false;
@@ -62,13 +62,15 @@ function deleteitem(id) {                               //deleting item
 }
 
 function onDeleteButtonClick() {
-    let itemId = $(this).closest('tr').attr('id');                   //get opened items id
-    $('#modalBackround').show();                                    //display modal windows
+    let itemId = $(this).closest('tr').attr('id'); //get opened items id
+    $('#modalBackround').show(); //display modal windows
     $('.modalDialogAlert').show();
-    let tmplalert =$('#alert-template').html().trim();     //rendering delete modal window
+    let tmplalert = $('#alert-template').html().trim(); //rendering delete modal window
     $('#alert-holder').html(_.template(tmplalert)({
         itemId,
-        itemName: searchResults.find(({id}) => parseInt(id) === parseInt(itemId)).itemName
+        itemName: searchResults.find(({
+                                          id
+                                      }) => parseInt(id) === parseInt(itemId)).itemName
     }))
 }
 
@@ -84,19 +86,21 @@ function drawCountryList() {
 
 }
 
-function onOpenDetailButtonClick() {                                           //on Open item
+function onOpenDetailButtonClick() { //on Open item
     $("#checkboxGroup").addClass("d-none");
     $('form[name="item"] :input').each(function() {
-        $(this).removeClass("text-danger border-danger");         //remove warnings from fields
+        $(this).removeClass("text-danger border-danger"); //remove warnings from fields
     })
-    $('form[name="item"] small').each(function() {                 //remove warnings label from fields
+    $('form[name="item"] small').each(function() { //remove warnings label from fields
         $(this).addClass("d-none");
     })
-    let itemId = $(this).closest('tr').attr('id');                  //get opened items id
-    let item = searchResults.find(({id}) => parseInt(id) === parseInt(itemId));//finding item
-    $('#modalBackround').show();                         //display modal windows
+    let itemId = $(this).closest('tr').attr('id'); //get opened items id
+    let item = searchResults.find(({
+                                       id
+                                   }) => parseInt(id) === parseInt(itemId)); //finding item
+    $('#modalBackround').show(); //display modal windows
     $('.modalDialogEdit').show();
-    $("#itemName").val(item.itemName);                   //filling fields with parameters of selected item
+    $("#itemName").val(item.itemName); //filling fields with parameters of selected item
     $("#supplierEmail").val(item.email);
     $("#itemCount").val(item.count);
     itemPriceinput.val(item.price);
@@ -109,19 +113,22 @@ function onOpenDetailButtonClick() {                                           /
     }).attr('selected', true);
     onSelectionChange();
     item.delivery.cities.map((val, index) => {
-        $.each($("input[type='checkbox']"), function(){
-           if ($(this).attr('name')==val){
-               $(this).prop("checked",true);
-           }
+        $.each($("input[type='checkbox']"), function() {
+            if ($(this).attr('name') == val) {
+                $(this).prop("checked", true);
+            }
         });
     });
+    if($('.checkcities:checked').length == $('.checkcities').length){
+        $("#checkAll").prop("checked", true);
+    }
 
-    itemPriceinput.trigger( "focusout" );
+    itemPriceinput.trigger("focusout");
 }
 
 //modals
 
-$('#openAddNew').on("click", () => {               //on open item modal
+$('#openAddNew').on("click", () => { //on open item modal
     $('#modalBackround').show();
     $('.modalDialogEdit').show();
     $('#selCountry option:selected').removeAttr('selected');
@@ -143,7 +150,7 @@ $(".modalDialogEdit .modalDialogAlert").click(e => {
 
 //sorting
 
-function compareValues(key, order = 'asc') {                //sorting object by key(field
+function compareValues(key, order = 'asc') { //sorting object by key(field
     return function innerSort(a, b) {
         const varA = (typeof a[key] === 'string') ?
             a[key].toUpperCase() : a[key];
@@ -161,32 +168,33 @@ function compareValues(key, order = 'asc') {                //sorting object by 
     };
 }
 
-function sort(arrowCurrent,arrowOther,key,refresh){     //hide arrow for name
+function sort(arrowCurrent, arrowOther, key, refresh) { //hide arrow for name
     arrowOther.html('');
     if (!refresh)
-    arrowChange(arrowCurrent);                                                //change arrow for price
+        arrowChange(arrowCurrent); //change arrow for price
     searchResults.sort(compareValues(key, sortStatus));
-    renderTable(searchResults)                                          //rerender after sorting
+    renderTable(searchResults) //rerender after sorting
 }
 
 $("#headerName").click(function() {
-    sort(arrowN,arrowP,'itemName',false)
+    sort(arrowN, arrowP, 'itemName', false)
 });
 
 $("#headerPrice").click(function() {
-    sort(arrowP,arrowN,'price',false)
+    sort(arrowP, arrowN, 'price', false)
 });
-function arrowChange(arrow) {                                          //changing arrow direction
+
+function arrowChange(arrow) { //changing arrow direction
     if (sortStatus === "none") {
-        sortStatus="asc";
+        sortStatus = "asc";
         arrow.html('&#9650;');
     } else {
         if (sortStatus === "asc") {
-            sortStatus="desc";
+            sortStatus = "desc";
             arrow.html('&#9660;');
         } else {
             if (sortStatus === "desc") {
-                sortStatus="asc";
+                sortStatus = "asc";
                 arrow.html('&#9650;');
             }
         }
@@ -201,13 +209,15 @@ function arrowChange(arrow) {                                          //changin
 
 //send to server
 
-$.fn.serializeFormJSON = function() {                           //serialize Form to JSON
-    const o = {cities:[]};
+$.fn.serializeFormJSON = function() { //serialize Form to JSON
+    const o = {
+        cities: []
+    };
     const a = this.serializeArray();
     $.each(a, function() {
-        if(Number.isInteger(parseInt(this.name))) {
+        if (Number.isInteger(parseInt(this.name))) {
             o.cities.push(this.name);
-        }else
+        } else
         if (o[this.name]) {
             if (!o[this.name].push) {
                 o[this.name] = [o[this.name]];
@@ -221,34 +231,34 @@ $.fn.serializeFormJSON = function() {                           //serialize Form
     return o;
 };
 
-$('form[name="item"]').submit(function() {                                  //form sending
+$('form[name="item"]').submit(function() { //form sending
 
     let i = 0;
     $($('form[name="item"] :input:text').get().reverse()).each(function() { //if field empty focus on it and add alert
-        if ($(this).attr('id')!="itemid")
-        if ($(this).val() == ""  || ($(this).val()==$("#supplierEmail").val() && !checkValidEmail($(this).val())) || ($(this).val()==$("#itemName").val() && checkName($(this).val()))  || ($(this).val()==itemPriceinput.val() && parseFloat($(this).val())<=0)) {
-            setdanger($(this));
-        }else {
-            i++;
-        }
+        if ($(this).attr('id') != "itemid")
+            if ($(this).val() == "" || ($(this).val() == $("#supplierEmail").val() && !checkValidEmail($(this).val())) || ($(this).val() == $("#itemName").val() && checkName($(this).val())) || ($(this).val() == itemPriceinput.val() && parseFloat($(this).val()) <= 0)) {
+                setdanger($(this));
+            } else {
+                i++;
+            }
     });
 
     if (i >= 4) {
         let item = $(this).serializeFormJSON();
-        ajaxReq("/senditem", item, result => {   //sending the form
+        ajaxReq("/senditem", item, result => { //sending the form
             if (result) {
-                renderTable(result);                            //render table
+                renderTable(result); //render table
                 itemsList = result;
                 searchResults = result;
                 searchByName();
-                if( arrowP.html()!=""){
-                    sort(arrowP,arrowN,'price',true)
+                if (arrowP.html() != "") {
+                    sort(arrowP, arrowN, 'price', true)
                 }
-                if( arrowN.html()!=""){
-                    sort(arrowN,arrowP,'itemName',true)
+                if (arrowN.html() != "") {
+                    sort(arrowN, arrowP, 'itemName', true)
                 }
 
-                $(':input', 'form[name="item"]')                 //clearing form
+                $(':input', 'form[name="item"]') //clearing form
                     .not(':button, :submit, :reset, :hidden')
                     .val('')
                     .prop('checked', false)
@@ -264,24 +274,27 @@ $('form[name="item"]').submit(function() {                                  //fo
 
 function searchByName() {
     let targetName = $('#serachitem').val();
-    searchResults = itemsList.filter(({itemName}) => itemName.toLowerCase().includes(targetName.toLowerCase()));   //searching
+    searchResults = itemsList.filter(({
+       itemName
+    }) => itemName.toLowerCase().includes(targetName.toLowerCase())); //searching
     renderTable(searchResults);
 }
 
-$('#searchButton').on("click", () => {                 //search button
+$('#searchButton').on("click", () => { //search button
     searchByName();
 })
 
-$('#serachitem').keypress(({keyCode}) => {                 //on Enter press
+$('#serachitem').keypress(({
+    keyCode
+}) => { //on Enter press
     if (keyCode == 13) {
         searchByName();
     }
 });
 
-$('#serachitem').keyup(function() {                         //if search field are empty render the default view
+$('#serachitem').keyup(function() { //if search field are empty render the default view
     if ($(this).val() == "") {
         renderTable(itemsList);
         searchResults = itemsList;
     }
 });
-

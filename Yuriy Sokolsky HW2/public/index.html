@@ -21,20 +21,20 @@
         </div>
     </div>
 
-    <table  class="table table-bordered mt-5">
+    <table class="table table-bordered mt-5">
         <thead>
         <tr>
             <th scope="col" id="headerName" style="cursor:pointer">
-                <div class="float-left ml-0" >
+                <div class="float-left ml-0">
                     Name
                 </div>
                 <div id="sortDirectionName" class="float-right mr-0 badge badge-dark"></div>
             </th>
             <th scope="col" id="headerPrice" style="cursor:pointer">
-                <div class="float-left ml-0" >
+                <div class="float-left ml-0">
                     Price
                 </div>
-                <div id="sortDirectionPrice" class="float-right mr-0 badge badge-dark" ></div>
+                <div id="sortDirectionPrice" class="float-right mr-0 badge badge-dark"></div>
             </th>
             <th scope="col">Actions</th>
         </tr>
@@ -89,49 +89,49 @@
             </div>
 
             <form name="item">
-                <input  class=" d-none" id="itemid" name="id" >
+                <input class=" d-none" id="itemid" name="id">
                 <div class="form-group w-50 pt-3">
                     <label for="itemName">Name: *</label>
-                    <input type="text" class="form-control" id="itemName" name="itemName"  maxlength="15" minlength="5">
+                    <input type="text" class="form-control" id="itemName" name="itemName" maxlength="15" minlength="5">
                     <small id="nameMaxLenAlert" class="form-text d-none text-danger">Name must be between 5 and 15 characters</small>
                 </div>
                 <div class="form-group w-50">
                     <label for="supplierEmail">Supplier email: *</label>
-                    <input type="text" class="form-control" id="supplierEmail" name="email" >
+                    <input type="text" class="form-control" id="supplierEmail" name="email">
                     <small id="itemEmailAlert" class="form-text d-none text-danger">Please enter a valid email</small>
                 </div>
                 <div class="form-group w-25">
                     <label for="itemCount">Count: *</label>
-                    <input type="text" class="form-control" id="itemCount" name="count" >
+                    <input type="text" class="form-control" id="itemCount" name="count">
                     <small id="itemCountAlert" class="form-text d-none text-danger">Enter valid count number</small>
                 </div>
                 <div class="form-group w-50">
                     <label for="itemPrice">Price: *</label>
-                    <input type="text" class="form-control" id="itemPrice" name="price" >
+                    <input type="text" class="form-control" id="itemPrice" name="price">
                     <small id="itemPriceAlert" class="form-text d-none text-danger">Enter valid decimal number</small>
                 </div>
 
                 <span>Delivery: </span>
 
                 <row class="d-flex mb-2">
-                    <select class="form-control col-md-4" name="country" id="selCountry" ></select>
+                    <select class="form-control col-md-4" name="country" id="selCountry"></select>
                     <script type="text/template" id="delivery-country-template">
                         <option selected="selected"> Select country</option>
                         <% for(var i = 0; i < countries.length; i++) { %>
                         <option value="<%=encodeURIComponent(countries[i].name)%>"  data-id="<%=encodeURIComponent(countries[i].id)%>" > <%=countries[i].name%></option>
                         <% } %>
-                     </script>
-                    <div  id="checkboxGroup" class="form-group col-md-5 border rounded border-dark ml-5 d-none"></div>
+                    </script>
+                    <div id="checkboxGroup" class="form-group col-md-5 border rounded border-dark ml-5 d-none"></div>
                     <script type="text/template" id="delivery-cities-template">
-                            <div class="checkbox border-bottom border-dark pt-1">
-                                <input type="checkbox" class="check" id="checkAll" style="cursor:pointer"> <label for="checkAll" style="cursor:pointer">Select All</label>
-                            </div>
-                            <% for(var i = 0; i < cities.length; i++) { %>
-                            <div class="checkbox pt-1" >
-                                <input type="checkbox" class="check" name="<%=encodeURIComponent(cities[i].id)%>" id="<%=encodeURIComponent(cities[i].name)%>" style="cursor:pointer"><label style="cursor:pointer" for="<%=encodeURIComponent(cities[i].name)%>" class="mb-0 pl-1"><%=_.escape(cities[i].name)%></label>
-                            </div>
+                        <div class="checkbox border-bottom border-dark pt-1">
+                            <input type="checkbox" class="check" id="checkAll" style="cursor:pointer"> <label for="checkAll" style="cursor:pointer">Select All</label>
+                        </div>
+                        <% for(var i = 0; i < cities.length; i++) { %>
+                        <div class="checkbox pt-1" >
+                            <input type="checkbox" class="check checkcities" name="<%=encodeURIComponent(cities[i].id)%>" id="<%=encodeURIComponent(cities[i].name)%>" style="cursor:pointer"><label style="cursor:pointer" for="<%=encodeURIComponent(cities[i].name)%>" class="mb-0 pl-1"><%=_.escape(cities[i].name)%></label>
+                        </div>
 
-                            <% } %>
+                        <% } %>
                     </script>
                 </row>
 
