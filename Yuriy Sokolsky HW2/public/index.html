@@ -75,16 +75,16 @@
             </div>
             <div id="alert-holder" class="text-center"></div>
             <script type="text/template" id="alert-template">
-                <div>Are you sure you want to delete <b><%=itemName%></b> ?</div>
-                <input id="yesDelete" type="button" onclick="deleteitem('<%=itemId%>')" class="btn btn-outline-primary m-3" value="Yes" />
-                <input id="CancelDelete" type="button" class="btn btn-outline-secondary m-3" onclick="closemodals()" value="No" />
+                <div>Are you sure you want to delete <b><%=_.escape(list[i].itemName)%></b> ?</div>
+                <input id="yesDelete" type="button" onclick="deleteItem('<%=itemId%>')" class="btn btn-outline-primary m-3" value="Yes" />
+                <input id="CancelDelete" type="button" class="btn btn-outline-secondary m-3" onclick="closeModals()" value="No" />
             </script>
         </div>
 
     </div>
     <div class="modalDialogEdit">
         <div class="modalContent border rounded border-dark">
-            <div class="modalHeader">Product Name
+            <div class="modalHeader">Product Details
                 <span class="close closeModalDialog">&times;</span>
             </div>
 
