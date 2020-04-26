@@ -69,7 +69,7 @@ $("#itemCount").on("input", function () {
   $("#itemCount").removeClass("text-danger border-danger");
 });
 
-state.itemPriceinput.on("input", function () {
+itemPriceinput.on("input", function () {
   //price checker
   this.value = this.value.replace(/[^\d\.]/g, "");
   if (
@@ -84,7 +84,7 @@ state.itemPriceinput.on("input", function () {
   }
 });
 
-state.itemPriceinput.focusout(function () {
+itemPriceinput.focusout(function () {
   //display price field like a dollar currency
   if ($(this).val() != "" && parseFloat($(this).val()) > 0)
     $(this).val(
@@ -95,7 +95,7 @@ state.itemPriceinput.focusout(function () {
     );
 });
 
-state.itemPriceinput.focusin(function () {
+itemPriceinput.focusin(function () {
   function resolveAfterInputRemoveDol() {
     //setting caret exactly to the position that the user clicked
     return new Promise((resolve) => {
@@ -107,9 +107,7 @@ state.itemPriceinput.focusin(function () {
     });
   }
   async function setCaret() {
-    state.itemPriceinput.val(
-      state.itemPriceinput.val().replace(/[^\d\.]/g, "")
-    ); //removing dollar sign
+    itemPriceinput.val(itemPriceinput.val().replace(/[^\d\.]/g, "")); //removing dollar sign
     const a = resolveAfterInputRemoveDol();
     return await a;
   }

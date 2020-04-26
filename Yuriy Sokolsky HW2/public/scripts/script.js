@@ -1,12 +1,13 @@
 //state
-this.state = {
+const state = {
   sortStatus: "none",
-  arrowP: $("#sortDirectionPrice"), //arrow for price
-  arrowN: $("#sortDirectionName"), //arrow for name
   itemsList: [], //for storage
-  searchResults: [], //for displaying
-  itemPriceinput: $("#itemPrice"),
+  searchResults: [] //for displaying
 };
+
+let arrowP = $("#sortDirectionPrice"); //arrow for price
+let arrowN = $("#sortDirectionName"); //arrow for name
+let itemPriceinput= $("#itemPrice");
 function secStarts() {
   //SetTimeout setInterval example for education
   let i = 0;
@@ -126,7 +127,7 @@ function onOpenDetailButtonClick() {
   $("#itemName").val(item.itemName); //filling fields with parameters of selected item
   $("#supplierEmail").val(item.email);
   $("#itemCount").val(item.count);
-  state.itemPriceinput.val(item.price);
+  itemPriceinput.val(item.price);
   $("#itemid").val(item.id);
   $("#selCountry option:selected").removeAttr("selected");
   drawCountryList();
@@ -148,7 +149,7 @@ function onOpenDetailButtonClick() {
     $("#checkAll").prop("checked", true);
   }
 
-  state.itemPriceinput.trigger("focusout");
+  itemPriceinput.trigger("focusout");
 }
 
 //modals
@@ -199,11 +200,11 @@ function sort(arrowCurrent, arrowOther, key, refresh) {
 }
 
 $("#headerName").click(function () {
-  sort(state.arrowN, state.arrowP, "itemName", false);
+  sort(arrowN, arrowP, "itemName", false);
 });
 
 $("#headerPrice").click(function () {
-  sort(state.arrowP, state.arrowN, "price", false);
+  sort(arrowP, arrowN, "price", false);
 });
 
 function arrowChange(arrow) {
@@ -266,7 +267,7 @@ $('form[name="item"]').submit(function () {
         ($(this)[0] == $("#supplierEmail")[0] &&
           !checkValidEmail($(this).val())) ||
         ($(this)[0] == $("#itemName")[0] && checkName($(this).val())) ||
-        ($(this)[0] == state.itemPriceinput[0] &&
+        ($(this)[0] == itemPriceinput[0] &&
           parseFloat($(this).val()) <= 0)
       ) {
         setdanger($(this));
@@ -285,11 +286,11 @@ $('form[name="item"]').submit(function () {
         state.itemsList = result;
         state.searchResults = result;
         searchByName();
-        if (state.arrowP.html() != "") {
-          sort(state.arrowP, state.arrowN, "price", true);
+        if (arrowP.html() != "") {
+          sort(arrowP, arrowN, "price", true);
         }
-        if (state.arrowN.html() != "") {
-          sort(state.arrowN, state.arrowP, "itemName", true);
+        if (arrowN.html() != "") {
+          sort(arrowN, arrowP, "itemName", true);
         }
 
         $(":input", 'form[name="item"]') //clearing form
@@ -312,11 +313,11 @@ function searchByName() {
     itemName.toLowerCase().includes(targetName.toLowerCase())
   ); //searching
   renderTable(state.searchResults);
-  if (state.arrowP.html() != "") {
-    sort(state.arrowP, state.arrowN, "price", true);
+  if (arrowP.html() != "") {
+    sort(arrowP, arrowN, "price", true);
   }
-  if (state.arrowN.html() != "") {
-    sort(state.arrowN, state.arrowP, "itemName", true);
+  if (arrowN.html() != "") {
+    sort(arrowN, arrowP, "itemName", true);
   }
 }
 
@@ -337,11 +338,11 @@ $("#serachitem").keyup(function () {
   if ($(this).val() == "") {
     renderTable(state.itemsList);
     state.searchResults = state.itemsList;
-    if (state.arrowP.html() != "") {
-      sort(state.arrowP, state.arrowN, "price", true);
+    if (arrowP.html() != "") {
+      sort(arrowP, arrowN, "price", true);
     }
-    if (state.arrowN.html() != "") {
-      sort(state.arrowN, state.arrowP, "itemName", true);
+    if (arrowN.html() != "") {
+      sort(arrowN, arrowP, "itemName", true);
     }
   }
 });
