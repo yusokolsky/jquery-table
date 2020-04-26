@@ -33,20 +33,13 @@ $(document).ready(() => {                                  //load item list on p
 //render
 
 function renderTable(items) {                                           //table render function
-    let tmpl = document.getElementById('grid-template').innerHTML.trim();
+    let tmpl = $("#grid-template").html().trim();
     tmpl = _.template(tmpl);
-    document.getElementById('grid-holder').innerHTML = tmpl({
+    $("#grid-holder").html(tmpl({
         list: items
-    });
-    for (const openDetailA of document.querySelectorAll('a[name="openDetail"]')) {      //set events for buttons which rendered
-        openDetailA.addEventListener('click', openDetail)
-    }
-    for (const editDetailIn of document.querySelectorAll('input[name="openEdit"]')) {
-        editDetailIn.addEventListener('click', openDetail)
-    }
-    for (const deleteitemIn of document.querySelectorAll('input[name="buttonDelete"]')) {
-        deleteitemIn.addEventListener('click', buttonDelete)
-    }
+    }));
+    $('a[name="openDetail"], input[name="openEdit"]').on('click', onOpenDetailButtonClick);
+    $('input[name="buttonDelete"]').on('click', onDeleteButtonClick);
 }
 
 //delete
@@ -68,20 +61,31 @@ function deleteitem(id) {                               //deleting item
     });
 }
 
-function buttonDelete() {
+function onDeleteButtonClick() {
     let itemId = $(this).closest('tr').attr('id');                   //get opened items id
     $('#modalBackround').show();                                    //display modal windows
     $('.modalDialogAlert').show();
-    let tmplalert = document.getElementById('alert-template').innerHTML.trim();     //rendering delete modal window
-    document.getElementById('alert-holder').innerHTML = _.template(tmplalert)({
+    let tmplalert =$('#alert-template').html().trim();     //rendering delete modal window
+    $('#alert-holder').html(_.template(tmplalert)({
         itemId,
         itemName: searchResults.find(({id}) => parseInt(id) === parseInt(itemId)).itemName
-    });
+    }))
 }
 
 //open detail modal
+function drawCountryList() {
+    let tmpl = $("#delivery-country-template").html().trim();
+    tmpl = _.template(tmpl);
+    $("#selCountry").html(tmpl({
+        countries: countries
+    }));
 
-function openDetail() {                                           //on Open item
+    $('#selCountry').on('change', onSelectionChange);
+
+}
+
+function onOpenDetailButtonClick() {                                           //on Open item
+    $("#checkboxGroup").addClass("d-none");
     $('form[name="item"] :input').each(function() {
         $(this).removeClass("text-danger border-danger");         //remove warnings from fields
     })
@@ -98,18 +102,20 @@ function openDetail() {                                           //on Open item
     itemPriceinput.val(item.price);
     $("#itemid").val(item.id);
     $("#selCountry option:selected").removeAttr("selected")
+    drawCountryList();
     $("#selCountry").val(item.delivery.country);
     $("#selCountry option").filter(function() {
         return this.text === item.delivery.country;
     }).attr('selected', true);
-    $("#selCountry").change();
-    Countries = [$("#city1"), $("#city2"), $("#city3")]
-    Countries[0].prop("checked", item.delivery.cities[0] ? true : false);
-    Countries[1].prop("checked", item.delivery.cities[1] ? true : false);
-    Countries[2].prop("checked", item.delivery.cities[2] ? true : false);
-    if(item.delivery.cities[0] && item.delivery.cities[1] && item.delivery.cities[2]){
-        $("#checkAll").prop('checked', true);
-    }
+    onSelectionChange();
+    item.delivery.cities.map((val, index) => {
+        $.each($("input[type='checkbox']"), function(){
+           if ($(this).attr('name')==val){
+               $(this).prop("checked",true);
+           }
+        });
+    });
+
     itemPriceinput.trigger( "focusout" );
 }
 
@@ -121,6 +127,7 @@ $('#openAddNew').on("click", () => {               //on open item modal
     $('#selCountry option:selected').removeAttr('selected');
     $("#checkboxGroup").addClass("d-none");
     $('form[name="item"]').trigger("reset");
+    drawCountryList();
 })
 
 $('.closeModalDialog,#Cancel,#CancelDelete').on("click", closemodals);
@@ -195,9 +202,12 @@ function arrowChange(arrow) {                                          //changin
 //send to server
 
 $.fn.serializeFormJSON = function() {                           //serialize Form to JSON
-    const o = {};
+    const o = {cities:[]};
     const a = this.serializeArray();
     $.each(a, function() {
+        if(Number.isInteger(parseInt(this.name))) {
+            o.cities.push(this.name);
+        }else
         if (o[this.name]) {
             if (!o[this.name].push) {
                 o[this.name] = [o[this.name]];
@@ -207,12 +217,15 @@ $.fn.serializeFormJSON = function() {                           //serialize Form
             o[this.name] = this.value || '';
         }
     });
+    console.log(o);
     return o;
 };
 
 $('form[name="item"]').submit(function() {                                  //form sending
+
     let i = 0;
     $($('form[name="item"] :input:text').get().reverse()).each(function() { //if field empty focus on it and add alert
+        if ($(this).attr('id')!="itemid")
         if ($(this).val() == ""  || ($(this).val()==$("#supplierEmail").val() && !checkValidEmail($(this).val())) || ($(this).val()==$("#itemName").val() && checkName($(this).val()))  || ($(this).val()==itemPriceinput.val() && parseFloat($(this).val())<=0)) {
             setdanger($(this));
         }else {
@@ -220,7 +233,7 @@ $('form[name="item"]').submit(function() {                                  //fo
         }
     });
 
-    if (i >= 5) {
+    if (i >= 4) {
         let item = $(this).serializeFormJSON();
         ajaxReq("/senditem", item, result => {   //sending the form
             if (result) {
@@ -264,6 +277,7 @@ $('#serachitem').keypress(({keyCode}) => {                 //on Enter press
         searchByName();
     }
 });
+
 $('#serachitem').keyup(function() {                         //if search field are empty render the default view
     if ($(this).val() == "") {
         renderTable(itemsList);

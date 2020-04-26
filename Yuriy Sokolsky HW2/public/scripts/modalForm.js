@@ -25,43 +25,24 @@ function setdanger(div){
     div.addClass("text-danger border-danger");
 }
 
-$("#checkAll").click(function() {                                //check all in form
-    $(".check").prop('checked', $(this).prop('checked'));
-});
 
-$("#selCountry").change(() => {                            //display cities depending on the selected country
+function onSelectionChange (){
+
+    let selectedCountryid= $("#selCountry option:selected").data('id');
+    let tmpl = $("#delivery-cities-template").html().trim();
+    tmpl = _.template(tmpl);
+    $("#checkboxGroup").html(tmpl({
+        cities: cities.filter(({countriId}) => countriId==selectedCountryid)
+    }));
+    if(selectedCountryid)
     $("#checkboxGroup").removeClass("d-none");
-    Countries = [$("#city1"), $("#city2"), $("#city3")]
-    $(".check").prop('checked',false);
-    switch ($("#selCountry option:selected").text()) {
-        case "Russia":
-            Countries[0].siblings('label').html('Saratov');
-            Countries[0].attr('value', 'Saratov');
-            Countries[1].siblings('label').html('Moscow');
-            Countries[1].attr('value', 'Moscow');
-            Countries[2].siblings('label').html('St. Petersburg');
-            Countries[2].attr('value', 'St. Petersburg');
-            break;
-        case "Belorus":
-            Countries[0].siblings('label').html('Minsk');
-            Countries[0].attr('value', 'Minsk');
-            Countries[1].siblings('label').html('Grodno');
-            Countries[1].attr('value', 'Grodno');
-            Countries[2].siblings('label').html('Vitebsk');
-            Countries[2].attr('value', 'Vitebsk');
-            break;
-        case "USA":
-            Countries[0].siblings('label').html('Washington');
-            Countries[0].attr('value', 'Washington');
-            Countries[1].siblings('label').html('New York');
-            Countries[1].attr('value', 'New York');
-            Countries[2].siblings('label').html('Seatle');
-            Countries[2].attr('value', 'Seatle');
-            break;
-        default:
-            $("#checkboxGroup").addClass("d-none");
-    }
-});
+
+    $("#checkAll").click(function() {                                //check all in form
+        $(".check").prop('checked', $(this).prop('checked'));
+    });
+
+}
+
 
 function checkName(namefiled){
 
