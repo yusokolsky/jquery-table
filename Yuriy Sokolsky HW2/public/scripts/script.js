@@ -1,3 +1,10 @@
+//state
+let sortStatus="none";
+let arrowP = $("#sortDirectionPrice");                              //arrow for price
+let arrowN = $("#sortDirectionName")                //arrow for name
+let itemsList = [];                                          //for storage
+let searchResults = [];                                         //for displaying
+let itemPriceinput=$("#itemPrice");
 
 function secStarts() {                                      //SetTimeout setInterval example for education
     let i = 0;
@@ -14,70 +21,16 @@ function ajaxReq(url, data, callback) {
         dataType: 'json'
     }).done(callback);
 }
-let itemsList = [];                                          //for storage
-let Searchresults = [];                                         //for displaying
+
 $(document).ready(() => {                                  //load item list on page ready
     ajaxReq("/getitems", {}, data => {
         itemsList = data;
-        Searchresults = data;
-        renderTable(Searchresults);
+        searchResults = data;
+        renderTable(searchResults);
     })
 });
-$.fn.serializeFormJSON = function() {                           //serialize Form to JSON
-    const o = {};
-    const a = this.serializeArray();
-    $.each(a, function() {
-        if (o[this.name]) {
-            if (!o[this.name].push) {
-                o[this.name] = [o[this.name]];
-            }
-            o[this.name].push(this.value || '');
-        } else {
-            o[this.name] = this.value || '';
-        }
-    });
-    return o;
-};
 
-function openDetail() {                                           //on Open item
-    $('form[name="item"] :input').each(function() {
-        $(this).removeClass("text-danger border-danger");         //remove warnings from fields
-    })
-    $('form[name="item"] small').each(function() {                 //remove warnings label from fields
-        $(this).addClass("d-none");
-    })
-    let itemId = $(this).closest('tr').attr('id');                  //get opened items id
-    let item = Searchresults.find(({id}) => parseInt(id) === parseInt(itemId));//finding item
-    $('#modalBackround').show();                         //display modal windows
-    $('.modalDialogEdit').show();
-    $("#itemName").val(item.itemName);                   //filling fields with parameters of selected item
-    $("#supplierEmail").val(item.email);
-    $("#itemCount").val(item.count);
-    $("#itemPrice").val(item.price);
-    $("#itemPrice").change();
-    $("#itemid").val(item.id);
-    $("#selCountry option:selected").removeAttr("selected")
-    $("#selCountry").val(item.delivery.country);
-    $("#selCountry option").filter(function() {
-        return this.text === item.delivery.country;
-    }).attr('selected', true);
-    $("#selCountry").change();
-    Countries = [$("#city1"), $("#city2"), $("#city3")]
-    Countries[0].prop("checked", item.delivery.cities[0] ? true : false);
-    Countries[1].prop("checked", item.delivery.cities[1] ? true : false);
-    Countries[2].prop("checked", item.delivery.cities[2] ? true : false);
-}
-
-function buttonDelete() {
-    let itemId = $(this).closest('tr').attr('id');                   //get opened items id
-    $('#modalBackround').show();                                    //display modal windows
-    $('.modalDialogAlert').show();
-    let tmplalert = document.getElementById('alert-template').innerHTML.trim();     //rendering delete modal window
-    document.getElementById('alert-holder').innerHTML = _.template(tmplalert)({
-        itemId,
-        itemName: Searchresults.find(({id}) => parseInt(id) === parseInt(itemId)).itemName
-    });
-}
+//render
 
 function renderTable(items) {                                           //table render function
     let tmpl = document.getElementById('grid-template').innerHTML.trim();
@@ -96,6 +49,8 @@ function renderTable(items) {                                           //table 
     }
 }
 
+//delete
+
 function deleteitem(id) {                               //deleting item
     ajaxReq("/deleteitem", {
         id
@@ -103,7 +58,7 @@ function deleteitem(id) {                               //deleting item
         if (result) {
             renderTable(result);                        //render table after deleting item
             itemsList = result;
-            Searchresults = result;
+            searchResults = result;
             closemodals();
             searchByName();                             //search again after render to display if item was delete after search
             return true
@@ -113,9 +68,53 @@ function deleteitem(id) {                               //deleting item
     });
 }
 
-function checkValidEmail(mail) {                        //check email for valid
-    return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail);
+function buttonDelete() {
+    let itemId = $(this).closest('tr').attr('id');                   //get opened items id
+    $('#modalBackround').show();                                    //display modal windows
+    $('.modalDialogAlert').show();
+    let tmplalert = document.getElementById('alert-template').innerHTML.trim();     //rendering delete modal window
+    document.getElementById('alert-holder').innerHTML = _.template(tmplalert)({
+        itemId,
+        itemName: searchResults.find(({id}) => parseInt(id) === parseInt(itemId)).itemName
+    });
 }
+
+//open detail modal
+
+function openDetail() {                                           //on Open item
+    $('form[name="item"] :input').each(function() {
+        $(this).removeClass("text-danger border-danger");         //remove warnings from fields
+    })
+    $('form[name="item"] small').each(function() {                 //remove warnings label from fields
+        $(this).addClass("d-none");
+    })
+    let itemId = $(this).closest('tr').attr('id');                  //get opened items id
+    let item = searchResults.find(({id}) => parseInt(id) === parseInt(itemId));//finding item
+    $('#modalBackround').show();                         //display modal windows
+    $('.modalDialogEdit').show();
+    $("#itemName").val(item.itemName);                   //filling fields with parameters of selected item
+    $("#supplierEmail").val(item.email);
+    $("#itemCount").val(item.count);
+    itemPriceinput.val(item.price);
+    $("#itemid").val(item.id);
+    $("#selCountry option:selected").removeAttr("selected")
+    $("#selCountry").val(item.delivery.country);
+    $("#selCountry option").filter(function() {
+        return this.text === item.delivery.country;
+    }).attr('selected', true);
+    $("#selCountry").change();
+    Countries = [$("#city1"), $("#city2"), $("#city3")]
+    Countries[0].prop("checked", item.delivery.cities[0] ? true : false);
+    Countries[1].prop("checked", item.delivery.cities[1] ? true : false);
+    Countries[2].prop("checked", item.delivery.cities[2] ? true : false);
+    if(item.delivery.cities[0] && item.delivery.cities[1] && item.delivery.cities[2]){
+        $("#checkAll").prop('checked', true);
+    }
+    itemPriceinput.trigger( "focusout" );
+}
+
+//modals
+
 $('#openAddNew').on("click", () => {               //on open item modal
     $('#modalBackround').show();
     $('.modalDialogEdit').show();
@@ -123,6 +122,7 @@ $('#openAddNew').on("click", () => {               //on open item modal
     $("#checkboxGroup").addClass("d-none");
     $('form[name="item"]').trigger("reset");
 })
+
 $('.closeModalDialog,#Cancel,#CancelDelete').on("click", closemodals);
 
 function closemodals() {
@@ -130,12 +130,11 @@ function closemodals() {
     $('.modalDialogAlert').hide();
     $('.modalDialogEdit').hide();
 }
+$(".modalDialogEdit .modalDialogAlert").click(e => {
+    e.stopPropagation();
+});
 
-function searchByName() {
-    let targetName = $('#serachitem').val();
-    Searchresults = itemsList.filter(({itemName}) => itemName.toLowerCase().includes(targetName.toLowerCase()));   //searching
-    renderTable(Searchresults);
-}
+//sorting
 
 function compareValues(key, order = 'asc') {                //sorting object by key(field
     return function innerSort(a, b) {
@@ -155,177 +154,111 @@ function compareValues(key, order = 'asc') {                //sorting object by 
     };
 }
 
-function sortByPrice() {                                            //sorting by price
-    let arrowP = $("#sortDirectionPrice");                              //arrow for price
-    let arrowN = $("#sortDirectionName")                                //arrow for name
-    arrowN.attr("data-sortStatus", "none");
-    arrowN.removeClass("badge badge-dark");                             //hide arrow for name
-    arrowN.html('');
-    arrowChange(arrowP);                                                //change arrow for price
-    if (arrowP.attr("data-sortStatus") === "largeToSmall")              //sort type is stored in arrow attribute
-        Searchresults.sort(compareValues('price', 'desc'));
-    else
-    if (arrowP.attr("data-sortStatus") === "SmallToLarge")
-        Searchresults.sort(compareValues('price', 'asc'));
-    renderTable(Searchresults)                                          //rerender after sorting
-}
-$("#headerName").click(sortByName);
-$("#headerPrice").click(sortByPrice);
-
-function sortByName() {                                             //sorting by name
-    let arrowP = $("#sortDirectionPrice");                          //arrow for price
-    let arrowN = $("#sortDirectionName");                           //arrow for name
-    arrowP.attr("data-sortStatus", "none");
-    arrowP.removeClass("badge badge-dark");                         //hide arrow for price
-    arrowP.html('');
-    arrowChange(arrowN);                                            //change arrow for price
-    if (arrowN.attr("data-sortStatus") === "largeToSmall")          //sort type is stored in arrow attribute
-        Searchresults.sort(compareValues('itemName', 'asc'));
-    else
-    if (arrowN.attr("data-sortStatus") === "SmallToLarge")
-        Searchresults.sort(compareValues('itemName', 'desc'));
-    renderTable(Searchresults)
+function sort(arrowCurrent,arrowOther,key,refresh){     //hide arrow for name
+    arrowOther.html('');
+    if (!refresh)
+    arrowChange(arrowCurrent);                                                //change arrow for price
+    searchResults.sort(compareValues(key, sortStatus));
+    renderTable(searchResults)                                          //rerender after sorting
 }
 
+$("#headerName").click(function() {
+    sort(arrowN,arrowP,'itemName',false)
+});
+
+$("#headerPrice").click(function() {
+    sort(arrowP,arrowN,'price',false)
+});
 function arrowChange(arrow) {                                          //changing arrow direction
-    if (arrow.attr("data-sortStatus") === "none") {
-        arrow.attr("data-sortStatus", "largeToSmall");
-        arrow.html('&#9660;');
-        arrow.addClass("badge badge-dark");
+    if (sortStatus === "none") {
+        sortStatus="asc";
+        arrow.html('&#9650;');
     } else {
-        if (arrow.attr("data-sortStatus") === "largeToSmall") {
-            arrow.attr("data-sortStatus", "SmallToLarge");
-            arrow.html('&#9650;');
+        if (sortStatus === "asc") {
+            sortStatus="desc";
+            arrow.html('&#9660;');
         } else {
-            if (arrow.attr("data-sortStatus") === "SmallToLarge") {
-                arrow.attr("data-sortStatus", "largeToSmall");
-                arrow.html('&#9660;');
-
+            if (sortStatus === "desc") {
+                sortStatus="asc";
+                arrow.html('&#9650;');
             }
         }
     }
 }
-$(".modalDialogEdit .modalDialogAlert").click(e => {
-    e.stopPropagation();
-});
+
 // $('#modalBackround').on("click",function () {                //closing a modal window by clicking outside
 //     $('#modalBackround').hide();
 //     $('.modalDialogAlert').hide();
 //     $('.modalDialogEdit').hide();
 // })
-$("#checkAll").click(function() {                                //check all in form
-    $(".check").prop('checked', $(this).prop('checked'));
-});
-$("#selCountry").change(() => {                            //display cities depending on the selected country
-    $("#checkboxGroup").removeClass("d-none");
-    Countries = [$("#city1"), $("#city2"), $("#city3")]
-    switch ($("#selCountry option:selected").text()) {
-        case "Russia":
-            Countries[0].siblings('label').html('Saratov');
-            Countries[0].attr('value', 'Saratov');
-            Countries[1].siblings('label').html('Moscow');
-            Countries[1].attr('value', 'Moscow');
-            Countries[2].siblings('label').html('St. Petersburg');
-            Countries[2].attr('value', 'St. Petersburg');
-            break;
-        case "Belorus":
-            Countries[0].siblings('label').html('Minsk');
-            Countries[0].attr('value', 'Minsk');
-            Countries[1].siblings('label').html('Grodno');
-            Countries[1].attr('value', 'Grodno');
-            Countries[2].siblings('label').html('Vitebsk');
-            Countries[2].attr('value', 'Vitebsk');
-            break;
-        case "USA":
-            Countries[0].siblings('label').html('Washington');
-            Countries[0].attr('value', 'Washington');
-            Countries[1].siblings('label').html('New York');
-            Countries[1].attr('value', 'New York');
-            Countries[2].siblings('label').html('Seatle');
-            Countries[2].attr('value', 'Seatle');
-            break;
-        default:
-            $("#checkboxGroup").addClass("d-none");
-    }
-});
+
+//send to server
+
+$.fn.serializeFormJSON = function() {                           //serialize Form to JSON
+    const o = {};
+    const a = this.serializeArray();
+    $.each(a, function() {
+        if (o[this.name]) {
+            if (!o[this.name].push) {
+                o[this.name] = [o[this.name]];
+            }
+            o[this.name].push(this.value || '');
+        } else {
+            o[this.name] = this.value || '';
+        }
+    });
+    return o;
+};
+
 $('form[name="item"]').submit(function() {                                  //form sending
-    let promise = new Promise((resolve, reject) => {
-        let i = 0;
-        $($('form[name="item"] :input:text').get().reverse()).each(function() { //if field empty focus on it and add alert
-            if ($(this).val() == "") {
-                $(this).focus();
-                $(this).addClass("text-danger border-danger");
-            } else {
-                i++;
+    let i = 0;
+    $($('form[name="item"] :input:text').get().reverse()).each(function() { //if field empty focus on it and add alert
+        if ($(this).val() == ""  || ($(this).val()==$("#supplierEmail").val() && !checkValidEmail($(this).val())) || ($(this).val()==$("#itemName").val() && checkName($(this).val()))  || ($(this).val()==itemPriceinput.val() && parseFloat($(this).val())<=0)) {
+            setdanger($(this));
+        }else {
+            i++;
+        }
+    });
+
+    if (i >= 5) {
+        let item = $(this).serializeFormJSON();
+        ajaxReq("/senditem", item, result => {   //sending the form
+            if (result) {
+                renderTable(result);                            //render table
+                itemsList = result;
+                searchResults = result;
+                searchByName();
+                if( arrowP.html()!=""){
+                    sort(arrowP,arrowN,'price',true)
+                }
+                if( arrowN.html()!=""){
+                    sort(arrowN,arrowP,'itemName',true)
+                }
+
+                $(':input', 'form[name="item"]')                 //clearing form
+                    .not(':button, :submit, :reset, :hidden')
+                    .val('')
+                    .prop('checked', false)
+                    .prop('selected', false);
+                closemodals();
             }
         });
-        if (i >= 4) {
-            resolve("result");                              //if all fields are good
-        } else reject("error");
-    });
-    promise
-        .then(
-            result => {
-                let item = $(this).serializeFormJSON();
-                ajaxReq("/senditem", item, result => {   //sending the form
-                    if (result) {
-                        renderTable(result);                            //render table
-                        itemsList = result;
-                        Searchresults=result;
-                        searchByName();
-                        $(':input', 'form[name="item"]')                 //clearing form
-                            .not(':button, :submit, :reset, :hidden')
-                            .val('')
-                            .prop('checked', false)
-                            .prop('selected', false);
-                        closemodals();
-                    } else {
-                        return false;
-                    }
-                })
-            },
-            error => {
-                console.log("promise rejected")
-            }
-        );
+    }
     return false;
 });
-$("#supplierEmail").change(function() {                             //email checker
-    if (checkValidEmail($(this).val())) {
-        $("#itemEmailAlert").addClass("d-none");
-        $("#supplierEmail").removeClass("text-danger border-danger");
-    } else {
-        $("#itemEmailAlert").removeClass("d-none");
-        $("#supplierEmail").addClass("text-danger border-danger");
-    }
-});
-$("#itemName").change(function() {                                     //name checker
-    if ((/^\s+$/.test(($(this).val()))) || $(this).val().length < 5 || $(this).val() > 15) {
-        $("#nameMaxLenAlert").removeClass("d-none");
-        $("#itemName").addClass("text-danger border-danger");
-    } else {
-        $("#nameMaxLenAlert").addClass("d-none");
-        $("#itemName").removeClass("text-danger border-danger");
-    }
-});
-$('#itemCount').on('input', function() {                            //count checker
-    this.value = this.value.replace(/[^0-9]/g, '');
-    $("#itemPriceAlert").addClass("itemCountAlert");
-    $("#itemCount").removeClass("text-danger border-danger");
-});
-$('#itemPrice').on('input', function() {                        //price checker
-    this.value = this.value.replace(/[^\d\.]/g, '');
-    if ($(this).val().match(/^-?\d+(?:\.\d+)?$/)) {
-        $("#itemPriceAlert").addClass("d-none");
-        $("#itemPrice").removeClass("text-danger border-danger");
-    } else {
-        $("#itemPriceAlert").removeClass("d-none");
-        $("#itemPrice").addClass("text-danger border-danger");
-    }
-});
+
+//search
+
+function searchByName() {
+    let targetName = $('#serachitem').val();
+    searchResults = itemsList.filter(({itemName}) => itemName.toLowerCase().includes(targetName.toLowerCase()));   //searching
+    renderTable(searchResults);
+}
+
 $('#searchButton').on("click", () => {                 //search button
     searchByName();
 })
+
 $('#serachitem').keypress(({keyCode}) => {                 //on Enter press
     if (keyCode == 13) {
         searchByName();
@@ -334,9 +267,7 @@ $('#serachitem').keypress(({keyCode}) => {                 //on Enter press
 $('#serachitem').keyup(function() {                         //if search field are empty render the default view
     if ($(this).val() == "") {
         renderTable(itemsList);
-        Searchresults = itemsList;
+        searchResults = itemsList;
     }
 });
-$("#itemPrice").change(function() {                     //display price field like a dollar currency
-    $(this).val(`$${parseFloat($(this).val(), 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString()}`);
-});
+
