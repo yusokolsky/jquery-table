@@ -59,3 +59,9 @@
     text-decoration: none;
     cursor: pointer;
 }
+
+.form-group .form-control {border: 1px solid black }
+.form-group .form-text { display: none }
+
+.form-group.error .form-control { border: 1px solid red }
+.form-group.error .form-text { display: block }

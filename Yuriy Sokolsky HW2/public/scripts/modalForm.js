@@ -1,11 +1,5 @@
-function displayNoneAndremoveDanger(div1, div2) {
-  div1.addClass("d-none");
-  div2.removeClass("text-danger border-danger");
-}
-
-function removedisplayNoneAndaddDanger(div1, div2) {
-  div1.removeClass("d-none");
-  div2.addClass("text-danger border-danger");
+function displayNoneAndremoveDanger(div) {
+  div.parent().removeClass("error");
 }
 
 function checkValidEmail(mail) {
@@ -16,15 +10,15 @@ function checkValidEmail(mail) {
 $("#supplierEmail").change(function () {
   //email checker
   if (checkValidEmail($(this).val())) {
-    displayNoneAndremoveDanger($("#itemEmailAlert"), $("#supplierEmail"));
+    displayNoneAndremoveDanger($("#itemEmailAlert"));
   } else {
-    removedisplayNoneAndaddDanger($("#itemEmailAlert"), $("#supplierEmail"));
+    setdanger($("#itemEmailAlert"));
   }
 });
 
 function setdanger(div) {
   div.focus();
-  div.addClass("text-danger border-danger");
+  div.parent().addClass("error");
 }
 
 function onSelectionChange() {
@@ -50,10 +44,10 @@ function checkName(namefiled) {
     namefiled.replace(/\s/g, "").length < 5 ||
     namefiled.replace(/\s/g, "").length > 15
   ) {
-    removedisplayNoneAndaddDanger($("#nameMaxLenAlert"), $("#itemName"));
+    setdanger($("#nameMaxLenAlert"));
     return true;
   } else {
-    displayNoneAndremoveDanger($("#nameMaxLenAlert"), $("#itemName"));
+    displayNoneAndremoveDanger($("#nameMaxLenAlert"));
   }
 }
 
@@ -78,9 +72,9 @@ itemPriceinput.on("input", function () {
       .match(/^-?\d+(?:\.\d+)?$/) &&
     parseFloat($(this).val()) > 0
   ) {
-    displayNoneAndremoveDanger($("#itemPriceAlert"), $("#itemPrice"));
+    displayNoneAndremoveDanger($("#itemPriceAlert"));
   } else {
-    removedisplayNoneAndaddDanger($("#itemPriceAlert"), $("#itemPrice"));
+    setdanger($("#itemPriceAlert"));
   }
 });
 
