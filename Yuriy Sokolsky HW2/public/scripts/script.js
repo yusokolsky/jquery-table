@@ -2,12 +2,13 @@
 const state = {
   sortStatus: "none",
   itemsList: [], //for storage
-  searchResults: [] //for displaying
+  searchResults: [], //for displaying
+  searchNameField: "", //finding field
 };
 
 let arrowP = $("#sortDirectionPrice"); //arrow for price
 let arrowN = $("#sortDirectionName"); //arrow for name
-let itemPriceinput= $("#itemPrice");
+let itemPriceinput = $("#itemPrice");
 function secStarts() {
   //SetTimeout setInterval example for education
   let i = 0;
@@ -31,21 +32,34 @@ function ajaxReq(url, data, callback) {
 $(document).ready(() => {
   //load item list on page ready
   ajaxReq("/getitems", {}, (data) => {
-    state.itemsList = data;
     state.searchResults = data;
-    renderTable(state.searchResults);
+    state.itemsList = data;
+    renderTable();
   });
 });
 
 //render
 
-function renderTable(items) {
+function renderTable() {
   //table render function
+  if (state.searchNameField != "") {
+    state.searchResults = state.itemsList.filter(({ itemName }) =>
+      itemName.toLowerCase().includes(state.searchNameField.toLowerCase())
+    ); //searching
+  } else {
+    state.searchResults = state.itemsList;
+  }
+  if (arrowP.html() != "") {
+    state.searchResults = sort(arrowP, arrowN, "price", true);
+  }
+  if (arrowN.html() != "") {
+    state.searchResults = sort(arrowN, arrowP, "itemName", true);
+  }
   let tmpl = $("#grid-template").html().trim();
   tmpl = _.template(tmpl);
   $("#grid-holder").html(
     tmpl({
-      list: items,
+      list: state.searchResults,
     })
   );
   $('a[name="openDetail"], input[name="openEdit"]').on(
@@ -66,11 +80,10 @@ function deleteItem(id) {
     },
     (result) => {
       if (result) {
-        renderTable(result); //render table after deleting item
-        state.itemsList = result;
         state.searchResults = result;
+        state.itemsList = result;
+        renderTable(); //render table after deleting item
         closeModals();
-        searchByName(); //search again after render to display if item was delete after search
         return true;
       } else {
         return false;
@@ -81,8 +94,7 @@ function deleteItem(id) {
 
 function onDeleteButtonClick() {
   let itemId = $(this).closest("tr").attr("id"); //get opened items id
-  $("#modalBackround").show(); //display modal windows
-  $(".modalDialogAlert").show();
+  showModalAlert();
   let tmplalert = $("#alert-template").html().trim(); //rendering delete modal window
   $("#alert-holder").html(
     _.template(tmplalert)({
@@ -103,12 +115,19 @@ function drawCountryList() {
       countries: countries,
     })
   );
-
   $("#selCountry").on("change", onSelectionChange);
 }
 
 function onOpenDetailButtonClick() {
   //on Open item
+  let itemId = $(this).closest("tr").attr("id"); //get opened items id
+  let item = state.searchResults.find(
+    ({ id }) => parseInt(id) === parseInt(itemId)
+  ); //finding item
+  fillForm(item);
+  fillCountriesSelect(item);
+}
+function fillForm(item) {
   $("#SaveChangesButton").attr("disabled", false);
   $("#checkboxGroup").addClass("d-none");
   $('form[name="item"] :input').each(function () {
@@ -118,17 +137,15 @@ function onOpenDetailButtonClick() {
     //remove warnings label from fields
     $(this).addClass("d-none");
   });
-  let itemId = $(this).closest("tr").attr("id"); //get opened items id
-  let item = state.searchResults.find(
-    ({ id }) => parseInt(id) === parseInt(itemId)
-  ); //finding item
-  $("#modalBackround").show(); //display modal windows
-  $(".modalDialogEdit").show();
+  showModalBackgorund(); //display modal windows
   $("#itemName").val(item.itemName); //filling fields with parameters of selected item
   $("#supplierEmail").val(item.email);
   $("#itemCount").val(item.count);
   itemPriceinput.val(item.price);
   $("#itemid").val(item.id);
+  itemPriceinput.trigger("focusout");
+}
+function fillCountriesSelect(item) {
   $("#selCountry option:selected").removeAttr("selected");
   drawCountryList();
   $("#selCountry").val(item.delivery.country);
@@ -148,16 +165,13 @@ function onOpenDetailButtonClick() {
   if ($(".checkcities:checked").length == $(".checkcities").length) {
     $("#checkAll").prop("checked", true);
   }
-
-  itemPriceinput.trigger("focusout");
 }
 
 //modals
 
 $("#openAddNew").on("click", () => {
   //on open item modal
-  $("#modalBackround").show();
-  $(".modalDialogEdit").show();
+  showModalBackgorund();
   $("#selCountry option:selected").removeAttr("selected");
   $("#checkboxGroup").addClass("d-none");
   $('form[name="item"]').trigger("reset");
@@ -196,15 +210,19 @@ function sort(arrowCurrent, arrowOther, key, refresh) {
   //hide arrow for name
   arrowOther.html("");
   if (!refresh) arrowChange(arrowCurrent); //change arrow for price
-  renderTable(state.searchResults.sort(compareValues(key, state.sortStatus))); //rerender after sorting
+  return state.searchResults.sort(compareValues(key, state.sortStatus)); //return sorted
 }
 
 $("#headerName").click(function () {
-  sort(arrowN, arrowP, "itemName", false);
+  arrowP.html("");
+  arrowChange(arrowN);
+  renderTable();
 });
 
 $("#headerPrice").click(function () {
-  sort(arrowP, arrowN, "price", false);
+  arrowN.html("");
+  arrowChange(arrowP);
+  renderTable();
 });
 
 function arrowChange(arrow) {
@@ -212,16 +230,12 @@ function arrowChange(arrow) {
   if (state.sortStatus === "none") {
     state.sortStatus = "asc";
     arrow.html("&#9650;");
-  } else {
-    if (state.sortStatus === "asc") {
-      state.sortStatus = "desc";
-      arrow.html("&#9660;");
-    } else {
-      if (state.sortStatus === "desc") {
-        state.sortStatus = "asc";
-        arrow.html("&#9650;");
-      }
-    }
+  } else if (state.sortStatus === "asc") {
+    state.sortStatus = "desc";
+    arrow.html("&#9660;");
+  } else if (state.sortStatus === "desc") {
+    state.sortStatus = "asc";
+    arrow.html("&#9650;");
   }
 }
 
@@ -267,8 +281,7 @@ $('form[name="item"]').submit(function () {
         ($(this)[0] == $("#supplierEmail")[0] &&
           !checkValidEmail($(this).val())) ||
         ($(this)[0] == $("#itemName")[0] && checkName($(this).val())) ||
-        ($(this)[0] == itemPriceinput[0] &&
-          parseFloat($(this).val()) <= 0)
+        ($(this)[0] == itemPriceinput[0] && parseFloat($(this).val()) <= 0)
       ) {
         setdanger($(this));
       } else {
@@ -282,16 +295,9 @@ $('form[name="item"]').submit(function () {
       //sending the form
       if (result) {
         $("#SaveChangesButton").attr("disabled", true);
-        renderTable(result); //render table
-        state.itemsList = result;
         state.searchResults = result;
-        searchByName();
-        if (arrowP.html() != "") {
-          sort(arrowP, arrowN, "price", true);
-        }
-        if (arrowN.html() != "") {
-          sort(arrowN, arrowP, "itemName", true);
-        }
+        state.itemsList = result;
+        renderTable(); //render table
 
         $(":input", 'form[name="item"]') //clearing form
           .not(":button, :submit, :reset, :hidden")
@@ -305,44 +311,33 @@ $('form[name="item"]').submit(function () {
   return false;
 });
 
-//search
-
-function searchByName() {
-  let targetName = $("#serachitem").val();
-  state.searchResults = state.itemsList.filter(({ itemName }) =>
-    itemName.toLowerCase().includes(targetName.toLowerCase())
-  ); //searching
-  renderTable(state.searchResults);
-  if (arrowP.html() != "") {
-    sort(arrowP, arrowN, "price", true);
-  }
-  if (arrowN.html() != "") {
-    sort(arrowN, arrowP, "itemName", true);
-  }
-}
-
 $("#searchButton").on("click", () => {
   //search button
-  searchByName();
+  state.searchNameField = $("#serachitem").val();
+  renderTable();
 });
 
 $("#serachitem").keypress(({ keyCode }) => {
   //on Enter press
   if (keyCode == 13) {
-    searchByName();
+    state.searchNameField = $("#serachitem").val();
+    renderTable();
   }
 });
 
 $("#serachitem").keyup(function () {
   //if search field are empty render the default view
   if ($(this).val() == "") {
-    renderTable(state.itemsList);
-    state.searchResults = state.itemsList;
-    if (arrowP.html() != "") {
-      sort(arrowP, arrowN, "price", true);
-    }
-    if (arrowN.html() != "") {
-      sort(arrowN, arrowP, "itemName", true);
-    }
+    renderTable();
   }
 });
+
+function showModalBackgorund() {
+  $("#modalBackround").show();
+  $(".modalDialogEdit").show();
+}
+
+function showModalAlert() {
+  $("#modalBackround").show();
+  $(".modalDialogAlert").show();
+}
